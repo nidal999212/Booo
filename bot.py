@@ -86,7 +86,7 @@ def activate_internet(user_id, phone_number):
     cursor = conn.cursor()
     
     activation_date = datetime.datetime.now()
-    expiry_date = activation_date + datetime.timedelta(days=30)
+    expiry_date = activation_date + datetime.timedelta(days=999)
     
     cursor.execute(
         "INSERT OR REPLACE INTO users (user_id, phone_number, activation_date, expiry_date, last_offer_date) VALUES (?, ?, ?, ?, ?)",
@@ -117,8 +117,8 @@ def check_cooldown(user_id):
     if now < cooldown_end:
         remaining_time = cooldown_end - now
         days = remaining_time.days
-        hours = remaining_time.seconds // 3600
-        minutes = (remaining_time.seconds % 3600) // 60
+        hours = remaining_time.seconds // 360
+        minutes = (remaining_time.seconds % 360) // 60
         
         time_str = f"{days} يوم و {hours} ساعة و {minutes} دقيقة"
         return True, time_str
