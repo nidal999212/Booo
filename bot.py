@@ -112,7 +112,7 @@ def check_cooldown(user_id):
     
     last_offer_date = datetime.datetime.fromisoformat(result[0])
     now = datetime.datetime.now()
-    cooldown_end = last_offer_date + datetime.timedelta(days=7)
+    cooldown_end = last_offer_date + datetime.timedelta(days=1)
     
     if now < cooldown_end:
         remaining_time = cooldown_end - now
