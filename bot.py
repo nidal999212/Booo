@@ -322,8 +322,7 @@ def main() -> None:
     setup_database()
     
     # Create the Application
-    application = Application.builder().token("7868033222:AAGNfGagKeRpFEgTC06CYrz7TjJIlDxUWmY").build()
-
+    application = Application.builder().token(os.environ["BOT_TOKEN"]).build()
     # Add conversation handler
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
